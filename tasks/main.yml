@@ -35,7 +35,7 @@
   ansible.builtin.lineinfile:
     path: /etc/rhsm/rhsm.conf
     regexp: '^hostname ='
-    line: "hostname = scgp1weuvmll-satlte-s01.scbde.corp"
+    line: "hostname = xx-satlte-s01.xx.xx"
     state: present
 
 - name: Set no_proxy
