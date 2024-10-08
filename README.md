@@ -9,9 +9,9 @@ This Ansible role registers a new host/VM with the Red Hat Satellite server.
 ## Role Variables
 | Variable | Description | Default |
 |----------|-------------|---------|
-| `satellite_url` | URL of the Satellite server | `http://scgp1weuvmll-satlte-s01.scbde.corp` |
+| `satellite_url` | URL of the Satellite server | `http://xxxx-satellite.xxx.xxx` |
 | `activation_key` | Activation key for the VM | `rhel89_pro` |
-| `organization` | Organization name in Satellite | `SCTSGermany` |
+| `organization` | Organization name in Satellite | `xxxxxxxxxx` |
 
 ## Dependencies
 None.
@@ -22,9 +22,9 @@ None.
     roles:
         - role: ansible-register-satellite
             vars:
-                satellite_url: "http://scgp1weuvmll-satlte-s01.scbde.corp"
+                satellite_url: "http://xx-xx-xx.xx"
                 activation_key: "rhel89_pro"
-                organization: "SCTSGermany"
+                organization: "xxxxxxxxxx"
 ```
 ## How to Invoke the Playbook
 Example 1: Registering a Host in the DEV Environment with Release 8.8  
@@ -43,4 +43,4 @@ ansible-playbook ansible/ansible-register-satellite/main.yml -i "180.210.44.213,
 MIT
 
 ## Author Information
-This role was created by ruwinda.fernando@santander.de / @ruwindada
+This role was created by @ruwindada
