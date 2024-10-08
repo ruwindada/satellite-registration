@@ -1,7 +1,7 @@
 # vars file for roles/register_host
 ---
-capsule: 'scgp1weuvmll-satlte-s01.scbde.corp'
-organization: 'SCTSGermany'
+capsule: 'xx-satlte-s01.xx.xx'
+organization: 'xxxxxxxxxx'
 host_group: ''
 release: '8.8'  # Example release version, you can set this dynamically
 environment: 'dev'  # Example environment, you can set this dynamically
