@@ -1,1 +1,21 @@
+# vars file for roles/register_host
+---
+capsule: 'scgp1weuvmll-satlte-s01.scbde.corp'
+organization: 'SCTSGermany'
+host_group: ''
+release: '8.8'  # Example release version, you can set this dynamically
+environment: 'dev'  # Example environment, you can set this dynamically
 
+activation_keys:
+  '8.8':
+    dev: 'rhel88_dev'
+    pre: 'rhel88_pre'
+    pro: 'rhel88_pro'
+  '8.9':
+    dev: 'rhel89_dev'
+    pre: 'rhel89_pre'
+    pro: 'rhel89_pro'
+  '8.10':
+    dev: 'rhel810_dev'
+    pre: 'rhel810_pre'
+    pro: 'rhel810_pro'
