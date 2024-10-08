@@ -1,1 +1,82 @@
+---
+- name: Check connectivity to port 80
+  ansible.builtin.wait_for:
+    host: "{{ capsule }}"
+    port: 80
+    timeout: 10
+  delegate_to: localhost
 
+- name: Check connectivity to port 443
+  ansible.builtin.wait_for:
+    host: "{{ capsule }}"
+    port: 443
+    timeout: 10
+  delegate_to: localhost
+
+- name: Starting and enabling rhsmcertsd
+  ansible.builtin.service:
+    name: rhsmcertd
+    state: started
+    enabled: yes
+
+- name: Remove all local subscription data
+  ansible.builtin.command:
+    cmd: subscription-manager clean
+
+- name: Disabling all repos
+  ansible.builtin.yum:
+    disablerepo: '*'
+
+- name: Removing previous katello-ca-consumer package
+  ansible.builtin.yum:
+    name: 'katello-ca-consumer-*'
+    state: removed
+- name: Set server hostname
+  ansible.builtin.lineinfile:
+    path: /etc/rhsm/rhsm.conf
+    regexp: '^hostname ='
+    line: "hostname = scgp1weuvmll-satlte-s01.scbde.corp"
+    state: present
+
+- name: Set no_proxy
+  ansible.builtin.lineinfile:
+    path: /etc/rhsm/rhsm.conf
+    regexp: '^no_proxy ='
+    line: "no_proxy = cdn.redhat.com,packages.microsoft.com,rhui4-1.microsoft.com,scgp1weuvmll-satlte-s01.scbde.corp"
+    state: present
+
+- name: Set baseurl
+  ansible.builtin.lineinfile:
+    path: /etc/rhsm/rhsm.conf
+    regexp: '^baseurl ='
+    line: "baseurl = https://scgp1weuvmll-satlte-s01.scbde.corp/pulp/content/"
+    state: present
+
+- name: Set repo_ca_cert
+  ansible.builtin.lineinfile:
+    path: /etc/rhsm/rhsm.conf
+    regexp: '^repo_ca_cert ='
+    line: "repo_ca_cert = %(ca_cert_dir)s/katello-server-ca.pem"
+    state: present
+
+- name: Install katello-ca-consumer
+  ansible.builtin.yum:
+    name: "https://{{ capsule }}/pub/katello-ca-consumer-latest.noarch.rpm"
+    state: present
+    validate_certs: no
+    disable_gpg_check: yes
+
+- name: Register the system on satellite
+  ansible.builtin.command:
+    cmd: subscription-manager register --org={{ organization }} --activationkey={{ activation_key }}
+  become: yes
+
+- name: Set the release version
+  ansible.builtin.command:
+    cmd: subscription-manager release --set={{ release }}
+  become: yes
+
+# - name: Enable repositories
+#   ansible.builtin.command:
+#     cmd: subscription-manager repos --enable=rhel-{{ release }}-for-x86_64-baseos-rpms --enable=rhel-{{ release }}-for-x86_64-appstream-rpms
+#   become: yes
