@@ -42,14 +42,14 @@
   ansible.builtin.lineinfile:
     path: /etc/rhsm/rhsm.conf
     regexp: '^no_proxy ='
-    line: "no_proxy = cdn.redhat.com,packages.microsoft.com,rhui4-1.microsoft.com,scgp1weuvmll-satlte-s01.scbde.corp"
+    line: "no_proxy = cdn.redhat.com,packages.microsoft.com,rhui4-1.microsoft.com,xx-satlte-s01.xx.xx"
     state: present
 
 - name: Set baseurl
   ansible.builtin.lineinfile:
     path: /etc/rhsm/rhsm.conf
     regexp: '^baseurl ='
-    line: "baseurl = https://scgp1weuvmll-satlte-s01.scbde.corp/pulp/content/"
+    line: "baseurl = https://xx-satlte-s01.xx.xx/pulp/content/"
     state: present
 
 - name: Set repo_ca_cert
