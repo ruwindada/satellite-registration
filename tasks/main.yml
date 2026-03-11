@@ -20,36 +20,46 @@
     enabled: yes
 
 - name: Remove all local subscription data
-  ansible.builtin.command:
-    cmd: subscription-manager clean
+  command: subscription-manager clean
 
 - name: Disabling all repos
   ansible.builtin.yum:
     disablerepo: '*'
 
+- name: Remove old RHUI repo files
+  ansible.builtin.file:
+    path: "/etc/yum.repos.d/{{ item }}"
+    state: absent
+  loop:
+    - rh-cloud-base.repo
+    - rh-cloud.repo
+  ignore_errors: yes
+
 - name: Removing previous katello-ca-consumer package
   ansible.builtin.yum:
     name: 'katello-ca-consumer-*'
     state: removed
+  ignore_errors: yes  # Ignore errors thrown due to repo not being enabled at this point
+
 - name: Set server hostname
   ansible.builtin.lineinfile:
     path: /etc/rhsm/rhsm.conf
     regexp: '^hostname ='
-    line: "hostname = xx-satlte-s01.xx.xx"
+    line: "hostname = scgp1weuvmll-satlte-001.scbde.corp"
     state: present
 
 - name: Set no_proxy
   ansible.builtin.lineinfile:
     path: /etc/rhsm/rhsm.conf
     regexp: '^no_proxy ='
-    line: "no_proxy = cdn.redhat.com,packages.microsoft.com,rhui4-1.microsoft.com,xx-satlte-s01.xx.xx"
+    line: "no_proxy = cdn.redhat.com,packages.microsoft.com,scgp1weuvmll-satlte-001.scbde.corp"
     state: present
 
 - name: Set baseurl
   ansible.builtin.lineinfile:
     path: /etc/rhsm/rhsm.conf
     regexp: '^baseurl ='
-    line: "baseurl = https://xx-satlte-s01.xx.xx/pulp/content/"
+    line: "baseurl = https://scgp1weuvmll-satlte-001.scbde.corp/pulp/content/"
     state: present
 
 - name: Set repo_ca_cert
@@ -61,22 +71,31 @@
 
 - name: Install katello-ca-consumer
   ansible.builtin.yum:
-    name: "https://{{ capsule }}/pub/katello-ca-consumer-latest.noarch.rpm"
+    name: "https://scgp1weuvmll-satlte-001.scbde.corp/pub/katello-ca-consumer-latest.noarch.rpm"
     state: present
     validate_certs: no
     disable_gpg_check: yes
 
+- name: Set activation key based on release and environment
+  set_fact:
+    activation_key: "{{ activation_keys[release | string][env_name | string] }}"
+
 - name: Register the system on satellite
-  ansible.builtin.command:
-    cmd: subscription-manager register --org={{ organization }} --activationkey={{ activation_key }}
+  command: subscription-manager register --org={{ organization }} --activationkey={{ activation_key }}
   become: yes
 
 - name: Set the release version
-  ansible.builtin.command:
-    cmd: subscription-manager release --set={{ release }}
+  command: subscription-manager release --set={{ release }}
   become: yes
 
 # - name: Enable repositories
 #   ansible.builtin.command:
 #     cmd: subscription-manager repos --enable=rhel-{{ release }}-for-x86_64-baseos-rpms --enable=rhel-{{ release }}-for-x86_64-appstream-rpms
 #   become: yes
+
+- name: Copy reboot check script to target host
+  ansible.builtin.copy:
+    src: rebootcheck.sh
+    dest: /usr/local/bin/rebootcheck.sh
+    mode: '0755'
+  become: yes
